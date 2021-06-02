@@ -1,15 +1,9 @@
 
 body_shop.py
-Dependencies/.DS_Store
+**/.DS_Store
 Dependencies/binary.txt
 Dependencies/date_last_updated.txt
-Dependencies/debug/.DS_Store
-Dependencies/libusta/.DS_Store
 *.pyc
 Dependencies/LOG.txt
-Dependencies/tables/.DS_Store
 *.csv
 *.xlsx
-Releases/.DS_Store
-.DS_Store
-Dependencies/libutr/.DS_Store
