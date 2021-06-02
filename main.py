@@ -7,6 +7,7 @@ from Dependencies.libusta.ranking_ripper import update_ranking_tables
 from Dependencies.libutr.utr_api_api import query_utr
 from Dependencies.libusta.new_tourn_query import query_tourn
 from Dependencies.libusta.query_player_ranking import query_usta_ranking
+import yagmail
 
 @click.command()
 @click.option('-ut', '--update_tables', is_flag=True, help='Flag to update ranking tables.')
@@ -21,31 +22,20 @@ def main(target_site,update_tables,debug,boy,girl):
     click.secho('Billing...',fg='white', bg='green')
     with open('Dependencies/binary.txt') as file:
         receiver_email = file.read()
-    port = 465
     smtp_server = "smtp.gmail.com"
-    sender_email = "matchbilling@gmail.com"
     password = "$World123"
     message = f"""\
-    Subject: Match2.0 Bill
-    From: Match2.0 Billing <matchbilling@gmail.com>
-    To: Valued Customer <fsjian@hotmail.com>
+        Hi there, valued customer!
 
-    Hi there, valued customer!
+        We noticed that you used our program recently, at {datetime.now()}. As you know, our time is extremely valuable, and I spent a lot of it on designing this code. As such, I expect to be compensated for my efforts. Also, that's what it says in LICENSE.
 
-    We noticed that you used our program recently, at {datetime.now()}. As you know, our time is extremely valuable, and I spent a lot of it on designing this code. As such, I expect to be compensated for my efforts. Also, that's what it says in LICENSE.
+        Please send 1(one) iPhone 12 Pro Max (512 GB of storage and Pacific Blue)(found here:https://www.apple.com/shop/buy-iphone/iphone-12-pro/6.7-inch-display-512gb-pacific-blue-unlocked) to Kaiji Fu before {datetime.now() + timedelta(days=7)}, or prepare to suffer the consequences.
 
-    Please send 1(one) iPhone 12 Pro Max (512 GB of storage and Pacific Blue)(found here:https://www.apple.com/shop/buy-iphone/iphone-12-pro/6.7-inch-display-512gb-pacific-blue-unlocked) to Kaiji Fu before {datetime.now() + timedelta(days=7)}, or prepare to suffer the consequences.
-
-    Cheers,
-    Match 2.0 Development Team
-
+        Cheers,
+        Match 2.0 Development Team
     """
-
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message)
-
+    yag = yagmail.SMTP({'matchbilling@gmail.com':'Match2.0 Billing'},'$World123')
+    yag.send(to={receiver_email:'Valued Customer'},subject='Match2.0 Bill',contents=message)
     if update_tables:
         update_ranking_tables()
 
