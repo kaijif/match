@@ -1,4 +1,4 @@
-import sys, os, smtplib, ssl, click
+import sys, os, smtplib, ssl, click, yagmail
 import pandas as pd
 from datetime import timedelta
 from datetime import datetime
@@ -7,7 +7,6 @@ from Dependencies.libusta.ranking_ripper import update_ranking_tables
 from Dependencies.libutr.utr_api_api import query_utr
 from Dependencies.libusta.new_tourn_query import query_tourn
 from Dependencies.libusta.query_player_ranking import query_usta_ranking
-import yagmail
 
 @click.command()
 @click.option('-ut', '--update_tables', is_flag=True, help='Flag to update ranking tables.')
