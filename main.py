@@ -77,9 +77,9 @@ def main(target_site,update_tables,debug,boy,girl):
     kairrie_summary = pd.DataFrame()
     current_time = datetime.now().strftime('%m.%d.%Y %H.%M.%S')
     tourn_name = tourn_name[:64]
-    out_name = f'{tourn_name}/{tourn_name} Roster {current_time}.xlsx'
-    os.makedirs(f'{tourn_name}', exist_ok=True)
-    with pd.ExcelWriter(f'Rosters/{out_name}') as writer:
+    out_name = f'Rosters/{tourn_name}/{tourn_name} Roster {current_time}.xlsx'
+    os.makedirs(f'Rosters/{tourn_name}', exist_ok=True)
+    with pd.ExcelWriter(out_name) as writer:
         click.secho('Writing.', nl=False,fg='white', bg='green')
         for div in list(base['Event'].unique()):
             kairrie = query_utr('Kairrie Fu')
