@@ -35,8 +35,7 @@ def update_ranking_tables():
             outs = outs.drop('City', 1)
             outs = outs.drop('State', 1)
             outs = outs.set_index('Rank')
-            with open(f'Dependencies/tables/{dis_gens[gen]} {age} & under Singles.csv', 'w') as file:
-                outs.to_csv(file, encoding='utf-8',errors='replace')
+            outs.to_csv(f'Dependencies/tables/{dis_gens[gen]} {age} & under Singles.csv', encoding='utf-8',errors='replace')
 
 
 
