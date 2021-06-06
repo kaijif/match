@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys, os, smtplib, ssl, click, yagmail
 import pandas as pd
 from datetime import timedelta
@@ -118,6 +119,11 @@ def main(target_site,update_tables,debug,boy,girl):
                 kairrie_summary = kairrie_summary.append(per_base[per_base['Name'] == 'Kairrie Fu'])
             per_base = per_base[['Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location']]
             per_base.to_excel(writer, sheet_name=div, index=False)
+            per_base['Singles UTR'] = per_base['Singles UTR'].replace('Not Found', -1)
+            per_base = per_base.sort_values('Singles UTR',ascending=False,ignore_index=True)
+            per_base['Singles UTR'] = per_base['Singles UTR'].replace(-1, 'Not Found')
+            per_base['Position'] = pd.Series(list(range(1,len(per_base.index.tolist())+1)))
+            per_base.to_excel(writer, sheet_name=div+'(UTR)', index=False)
         if not kaiji_summary.empty:
             kaiji_summary = kaiji_summary.sort_values('Event')
             kaiji_summary['Recommended'] = kaiji_summary['Event'] == 'Boys\' 14 & Under Singles'
