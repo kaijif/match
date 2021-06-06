@@ -118,12 +118,15 @@ def main(target_site,update_tables,debug,boy,girl):
             if 'Kairrie Fu' in per_base['Name'].values:
                 kairrie_summary = kairrie_summary.append(per_base[per_base['Name'] == 'Kairrie Fu'])
             per_base = per_base[['Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location']]
+            utr_per_base = per_base
+            utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace('Not Found', -1)
+            utr_per_base = utr_per_base.sort_values('Singles UTR',ascending=False,ignore_index=True)
+            utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace(-1, 'Not Found')
+            utr_per_base['Position'] = pd.Series(list(range(1,len(utr_per_base.index.tolist())+1)))
+            utr_per_base.to_excel(writer, sheet_name=div+'(UTR)', index=False)
+            per_base['UTR Position'] = utr_per_base['Position']
+            per_base = per_base[['Position', 'UTR Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location']]
             per_base.to_excel(writer, sheet_name=div, index=False)
-            per_base['Singles UTR'] = per_base['Singles UTR'].replace('Not Found', -1)
-            per_base = per_base.sort_values('Singles UTR',ascending=False,ignore_index=True)
-            per_base['Singles UTR'] = per_base['Singles UTR'].replace(-1, 'Not Found')
-            per_base['Position'] = pd.Series(list(range(1,len(per_base.index.tolist())+1)))
-            per_base.to_excel(writer, sheet_name=div+'(UTR)', index=False)
         if not kaiji_summary.empty:
             kaiji_summary = kaiji_summary.sort_values('Event')
             kaiji_summary['Recommended'] = kaiji_summary['Event'] == 'Boys\' 14 & Under Singles'
@@ -136,7 +139,12 @@ def main(target_site,update_tables,debug,boy,girl):
             kairrie_summary.to_excel(writer, sheet_name='Kairrie\'s Summary', index=False)
     wb = load_workbook(out_name)
     for sheet in wb.worksheets:
-        if 'Summary' not in sheet.title:
+        if 'Summary' not in sheet.title and '(UTR)' not in sheet.title:
+            sheet.column_dimensions['B'].width = 12
+            sheet.column_dimensions['C'].width = 30
+            sheet.column_dimensions['E'].width = 10
+            sheet.column_dimensions['F'].width = 30
+        elif 'Summary' not in sheet.title and '(UTR)' in sheet.title:
             sheet.column_dimensions['B'].width = 30
             sheet.column_dimensions['D'].width = 10
             sheet.column_dimensions['E'].width = 30
