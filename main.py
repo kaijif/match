@@ -120,7 +120,7 @@ def main(target_site,update_tables,debug,boy,girl):
             per_base = per_base[['Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location']]
             utr_per_base = per_base
             utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace('Not Found', -1)
-            utr_per_base = utr_per_base.sort_values('Singles UTR',ascending=False,ignore_index=True)
+            utr_per_base = utr_per_base.sort_values('Singles UTR',ignore_index=True)
             utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace(-1, 'Not Found')
             utr_per_base['Position'] = pd.Series(list(range(1,len(utr_per_base.index.tolist())+1)))
             utr_per_base.to_excel(writer, sheet_name=div+'(UTR)', index=False)
