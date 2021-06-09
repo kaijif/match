@@ -53,7 +53,10 @@ def query_utr(player_name, cookies, cookies_number=1):
     else:
         utr_request = requests.get('https://app.myutr.com/api/v2/search/players', params=payload, cookies=cookies_2,
                                    headers=headers)
-    utr_response = utr_request.json()
+    try:
+        utr_response = utr_request.json()
+    except json.JSONDecodeError:
+        raise json.JSONDecodeError(f'UTR sent back something weird:{utr_request.content}',doc=utr_request.json(),pos=0)
     for player in utr_response['hits']:
         data_out.append(player['source'])
     included_keys = ["displayName", "singlesUtr", "display"]
