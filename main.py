@@ -10,7 +10,7 @@ from Dependencies.libusta.new_tourn_query import query_tourn
 from Dependencies.libusta.query_player_ranking import query_usta_ranking
 
 @click.command()
-@click.option('-ut', '--update_tables', is_flag=True, help='Flag to update ranking tables.')
+@click.option('-u', '--update_tables', is_flag=True, help='Flag to update ranking tables.')
 @click.option('-d','--debug', is_flag=True, help='Flag to enable debug logging')
 @click.option('-b','--boy',is_flag=True,help='Flag to only pull down Boys')
 @click.option('-g','--girl',is_flag=True,help='Flag to only pull down Girls')
