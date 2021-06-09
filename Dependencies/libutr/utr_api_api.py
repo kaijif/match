@@ -3,8 +3,7 @@ import requests
 import stringdist
 import json
 
-def query_utr(player_name, cookies_number=1):
-    data_out = []
+def utr_login():
     auth_data = json.loads('{"email":"fsjian@hotmail.com","password":"Netmaker99"}')
     auth_headers = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -24,7 +23,11 @@ def query_utr(player_name, cookies_number=1):
     }
     auth = requests.post('https://app.universaltennis.com/api/v1/auth/login',json=auth_data,headers=auth_headers)
     cookies = {'jwt':auth.headers['jwt-token']}
+    return cookies
+
+def query_utr(player_name, cookies, cookies_number=1):
     cookies2 = None
+    data_out = []
     payload = {
         'query': f'{player_name}'
     }

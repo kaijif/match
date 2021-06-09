@@ -5,7 +5,7 @@ from datetime import timedelta
 from datetime import datetime
 from openpyxl import load_workbook
 from Dependencies.libusta.ranking_ripper import update_ranking_tables
-from Dependencies.libutr.utr_api_api import query_utr
+from Dependencies.libutr.utr_api_api import query_utr,utr_login
 from Dependencies.libusta.new_tourn_query import query_tourn
 from Dependencies.libusta.query_player_ranking import query_usta_ranking
 
@@ -44,6 +44,7 @@ def main(target_site,update_tables,debug,boy,girl):
     if debug:
         tourn.to_csv(f'Dependencies/debug/tourn_{datetime.now()}.txt')
     ind = 1
+    cookie = utr_login()
     base = pd.DataFrame()
     with open('Dependencies/date_last_updated.txt', 'r') as file:
         date = file.read()
@@ -61,9 +62,10 @@ def main(target_site,update_tables,debug,boy,girl):
         tourn = tourn.set_index(pd.Series(list(range(1, len(tourn.index) + 1))))
 
     print(tourn)
+
     for player in tourn['Player name'].tolist():
         click.secho(f'Looking up info for {player}', fg='white', bg='green')
-        utr = query_utr(player, 1)
+        utr = query_utr(player, cookies=cookie)
         if debug:
             utr.to_csv(f'Dependencies/debug/utr_{utr[0]}_{datetime.now()}.txt')
         usta = query_usta_ranking(player.upper(), tourn['Events'][ind])
@@ -83,7 +85,7 @@ def main(target_site,update_tables,debug,boy,girl):
     with pd.ExcelWriter(out_name) as writer:
         click.secho('Writing.', nl=False,fg='white', bg='green')
         for div in list(base['Event'].unique()):
-            kairrie = query_utr('Kairrie Fu')
+            kairrie = query_utr('Kairrie Fu',cookies=cookie)
             click.secho('.', nl=False,fg='white', bg='green')
             kairrie['USTA rank'] = query_usta_ranking('Kairrie Fu'.upper(), div)[0]
             kairrie['Event'] = div
@@ -92,7 +94,7 @@ def main(target_site,update_tables,debug,boy,girl):
             per_base = base[base['Event'] == div]
             if kairrie['USTA rank'] != 'NaN':
                 per_base = per_base.append(kairrie)
-            kaiji = query_utr('Kaiji Fu')
+            kaiji = query_utr('Kaiji Fu',cookies=cookie)
             kaiji['USTA rank'] = query_usta_ranking('Kaiji Fu'.upper(), div)[0]
             kaiji['Event'] = div
             kaiji['Player Location'] = 'Greenville, NC'
@@ -118,15 +120,13 @@ def main(target_site,update_tables,debug,boy,girl):
             if 'Kairrie Fu' in per_base['Name'].values:
                 kairrie_summary = kairrie_summary.append(per_base[per_base['Name'] == 'Kairrie Fu'])
             per_base = per_base[['Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location']]
-            utr_per_base = per_base
+            per_base.to_excel(writer, sheet_name=div, index=False)
+            utr_per_base = per_base.copy()
             utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace('Not Found', -1)
-            utr_per_base = utr_per_base.sort_values('Singles UTR',ignore_index=True)
+            utr_per_base = utr_per_base.sort_values('Singles UTR',ascending=False,ignore_index=True)
             utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace(-1, 'Not Found')
             utr_per_base['Position'] = pd.Series(list(range(1,len(utr_per_base.index.tolist())+1)))
             utr_per_base.to_excel(writer, sheet_name=div+'(UTR)', index=False)
-            per_base['UTR Position'] = utr_per_base['Position']
-            per_base = per_base[['Position', 'UTR Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location']]
-            per_base.to_excel(writer, sheet_name=div, index=False)
         if not kaiji_summary.empty:
             kaiji_summary = kaiji_summary.sort_values('Event')
             kaiji_summary['Recommended'] = kaiji_summary['Event'] == 'Boys\' 14 & Under Singles'
