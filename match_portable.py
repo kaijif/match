@@ -140,10 +140,9 @@ def main(target_site,update_tables,debug,boy,girl):
     wb = load_workbook(out_name)
     for sheet in wb.worksheets:
         if 'Summary' not in sheet.title and '(UTR)' not in sheet.title:
-            sheet.column_dimensions['B'].width = 12
-            sheet.column_dimensions['C'].width = 30
-            sheet.column_dimensions['E'].width = 10
-            sheet.column_dimensions['F'].width = 30
+            sheet.column_dimensions['B'].width = 30
+            sheet.column_dimensions['D'].width = 10
+            sheet.column_dimensions['E'].width = 30
         elif 'Summary' not in sheet.title and '(UTR)' in sheet.title:
             sheet.column_dimensions['B'].width = 30
             sheet.column_dimensions['D'].width = 10

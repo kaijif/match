@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import stringdist
 import json
+import time
 
 def utr_login():
     auth_data = json.loads('{"email":"fsjian@hotmail.com","password":"Netmaker99"}')
@@ -56,7 +57,11 @@ def query_utr(player_name, cookies, cookies_number=1):
     try:
         utr_response = utr_request.json()
     except json.JSONDecodeError:
-        raise json.JSONDecodeError(f'UTR sent back something weird:{utr_request.content}',doc=utr_request.json(),pos=0)
+        print('Something went wrong...trying again in ten seconds')
+        time.sleep(10)
+        utr_request = requests.get('https://app.myutr.com/api/v2/search/players', params=payload, cookies=cookies,
+                                   headers=headers)
+        utr_response = utr_request.json()
     for player in utr_response['hits']:
         data_out.append(player['source'])
     included_keys = ["displayName", "singlesUtr", "display"]

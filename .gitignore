@@ -9,3 +9,7 @@ Dependencies/LOG.txt
 *.xlsx
 Rosters/*
 !Rosters/.READMEIFUWANT
+__pycache__/*
+build/*
+dist/*
+match_portable.spec
