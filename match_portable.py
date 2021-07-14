@@ -14,8 +14,9 @@ from Dependencies.libusta.query_player_ranking import query_usta_ranking
 @click.option('-d','--debug', is_flag=True, help='Flag to enable debug logging')
 @click.option('-b','--boy',is_flag=True,help='Flag to only pull down Boys')
 @click.option('-g','--girl',is_flag=True,help='Flag to only pull down Girls')
+@click.option('-s', '--sections', multiple=True ,help='Sections to rank, if any')
 @click.argument('target_site',required=True,type=str)
-def main(target_site,update_tables,debug,boy,girl):
+def main(target_site,update_tables,debug,boy,girl,sections):
     with open('Dependencies/LOG.txt', 'w') as file:
         file.write(f'Used @ {datetime.now()}')
     pd.options.mode.chained_assignment = None
@@ -72,6 +73,7 @@ def main(target_site,update_tables,debug,boy,girl):
         utr['USTA rank'] = usta[0]
         utr['Player Location'] = usta[1]
         utr['Event'] = tourn['Events'][ind]
+        utr['Section'] = usta[2]
         base = base.append(utr)
         ind += 1
     base = base.reset_index(drop=True)
@@ -90,6 +92,7 @@ def main(target_site,update_tables,debug,boy,girl):
             kairrie['USTA rank'] = query_usta_ranking('Kairrie Fu'.upper(), div)[0]
             kairrie['Event'] = div
             kairrie['Player Location'] = 'Greenville, NC'
+            kairrie['Section'] = 'Southern'
             click.secho('.', nl=False,fg='white', bg='green')
             per_base = base[base['Event'] == div]
             if kairrie['USTA rank'] != 'NaN':
@@ -98,6 +101,7 @@ def main(target_site,update_tables,debug,boy,girl):
             kaiji['USTA rank'] = query_usta_ranking('Kaiji Fu'.upper(), div)[0]
             kaiji['Event'] = div
             kaiji['Player Location'] = 'Greenville, NC'
+            kaiji['Section'] = 'Southern'
             click.secho('.', nl=False,fg='white', bg='green')
             if kaiji['USTA rank'] != 'NaN':
                 per_base = per_base.append(kaiji)
@@ -119,14 +123,47 @@ def main(target_site,update_tables,debug,boy,girl):
                 kaiji_summary = kaiji_summary.append(per_base[per_base['Name'] == 'Kaiji Fu'])
             if 'Kairrie Fu' in per_base['Name'].values:
                 kairrie_summary = kairrie_summary.append(per_base[per_base['Name'] == 'Kairrie Fu'])
-            per_base = per_base[['Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location']]
-            per_base.to_excel(writer, sheet_name=div, index=False)
+            per_base = per_base.reset_index()
             utr_per_base = per_base.copy()
             utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace('Not Found', -1)
             utr_per_base = utr_per_base.sort_values('Singles UTR',ascending=False,ignore_index=True)
             utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace(-1, 'Not Found')
             utr_per_base['Position'] = pd.Series(list(range(1,len(utr_per_base.index.tolist())+1)))
-            utr_per_base.to_excel(writer, sheet_name=div+'(UTR)', index=False)
+            utr_per_base_to_write = utr_per_base.copy()
+            utr_numeric = pd.to_numeric(utr_per_base['USTA Rank'].replace('Not Found', 99999))
+            utr_per_base['USTA Rank'] = utr_numeric
+            utr_per_base = utr_per_base.sort_values(by='USTA Rank')
+            utr_per_base['USTA Rank'] = utr_per_base['USTA Rank'].replace(99999, 'Not Found')
+            utr_per_base = utr_per_base.replace('NaN', 'Not Found')
+            utr_per_base = utr_per_base.drop_duplicates()
+            utr_per_base = utr_per_base.reset_index()
+            per_base = per_base.reset_index()
+            per_base['UTR Position'] = utr_per_base['Position']
+            per_base = per_base[['Position','UTR Position', 'Name', 'USTA Rank', 'Singles UTR', 'Player Location','Section']]
+            per_base.to_excel(writer, sheet_name=div, index=False)
+            utr_per_base_to_write = utr_per_base_to_write[['Position', 'Name', 'Event', 'USTA Rank', 'Singles UTR', 'Player Location', 'Section']]
+            utr_per_base_to_write.to_excel(writer, sheet_name=div + '(UTR)', index=False)
+            if sections:
+                sections = list(sections)
+                for section in sections:
+                    if section in per_base['Section'].values:
+                        section_roster = per_base[per_base['Section'] == section]
+                        section_roster = section_roster.sort_values(by='USTA Rank')
+                        if div.startswith('Boy'):
+                            sheet_name = div[:9] + f'({section})'
+                        else:
+                            sheet_name = div[:10] + f'({section})'
+                        section_roster = section_roster.rename(columns={'Position':'Overall Ranking'})
+                        section_rankings = []
+                        for num in range(1, len(section_roster.index) + 1):
+                            section_rankings.append(num)
+                        section_roster = section_roster.reset_index()
+                        section_roster['Section Ranking'] = pd.Series(section_rankings)
+                        section_roster = section_roster.set_index('Section Ranking')
+                        section_roster = section_roster[['Overall Ranking','Name','USTA Rank','Singles UTR', 'Player Location']]
+                        section_roster.to_excel(writer,sheet_name=sheet_name)
+                    else:
+                        pass
         if not kaiji_summary.empty:
             kaiji_summary = kaiji_summary.sort_values('Event')
             kaiji_summary['Recommended'] = kaiji_summary['Event'] == 'Boys\' 14 & Under Singles'
@@ -139,19 +176,32 @@ def main(target_site,update_tables,debug,boy,girl):
             kairrie_summary.to_excel(writer, sheet_name='Kairrie\'s Summary', index=False)
     wb = load_workbook(out_name)
     for sheet in wb.worksheets:
-        if 'Summary' not in sheet.title and '(UTR)' not in sheet.title:
-            sheet.column_dimensions['B'].width = 30
-            sheet.column_dimensions['D'].width = 10
-            sheet.column_dimensions['E'].width = 30
+        if '(' in sheet.title and 'UTR' not in sheet.title:
+            sheet.column_dimensions['A'].width = 20
+            sheet.column_dimensions['B'].width = 20
+            sheet.column_dimensions['C'].width = 40
+            sheet.column_dimensions['E'].width = 10
+            sheet.column_dimensions['F'].width = 30
+        elif 'Summary' not in sheet.title and '(UTR)' not in sheet.title:
+            sheet.column_dimensions['B'].width = 20
+            sheet.column_dimensions['C'].width = 30
+            sheet.column_dimensions['E'].width = 10
+            sheet.column_dimensions['F'].width = 30
+            sheet.column_dimensions['G'].width = 30
         elif 'Summary' not in sheet.title and '(UTR)' in sheet.title:
             sheet.column_dimensions['B'].width = 30
             sheet.column_dimensions['D'].width = 10
             sheet.column_dimensions['E'].width = 30
-        else:
+            sheet.column_dimensions['F'].width = 30
+            sheet.column_dimensions['G'].width = 30
+        elif 'Summary' in sheet.title:
             sheet.column_dimensions['B'].width = 30
             sheet.column_dimensions['C'].width = 30
             sheet.column_dimensions['E'].width = 10
             sheet.column_dimensions['F'].width = 15
+        else:
+            print('One of the sheets had an invalid name')
+
     wb.save(out_name)
     print('')
     click.secho('Done!', fg='white', bg='green')

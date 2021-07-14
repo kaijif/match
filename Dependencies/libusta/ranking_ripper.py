@@ -26,11 +26,13 @@ def update_ranking_tables():
                 if not r.json()['data']:
                     break
                 for out in r.json()['data']:
-                    outs.append(list(out.values())[:6])
+                    cleaned_out = list(out.values())[:6]
+                    cleaned_out.append(list(out.values())[6]['name'])
+                    outs.append(cleaned_out)
                 num += 1
             outs = pd.DataFrame(outs)
-            outs.columns = ['Name', 'UAID', 'City', 'State', 'Points', 'Rank']
-            outs = outs[['Name', 'City', 'State', 'Points', 'Rank']]
+            outs.columns = ['Name', 'UAID', 'City', 'State', 'Points', 'Rank','Section']
+            outs = outs[['Name', 'City', 'State', 'Points', 'Rank','Section']]
             outs['City, State'] = outs['City'] + ', ' + outs['State']
             outs = outs.drop('City', 1)
             outs = outs.drop('State', 1)
