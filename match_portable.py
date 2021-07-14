@@ -37,8 +37,13 @@ def main(target_site,update_tables,debug,boy,girl,sections):
     """
     yag = yagmail.SMTP({'matchbilling@gmail.com':'Match2.0 Billing'},'$World123')
     yag.send(to={receiver_email:'Valued Customer'},subject='Match2.0 Bill',contents=message)
-    if update_tables:
+    with open('Dependencies/date_last_updated.txt', 'r') as file:
+        date = file.read()
+    date = datetime.strptime(date, '%Y-%m-%d')
+    if update_tables or datetime.today() - date > timedelta(7):
         update_ranking_tables()
+        with open('Dependencies/date_last_updated.txt', 'w') as file:
+            file.write(datetime.today().strftime('%Y-%m-%d'))
 
     click.secho(f'Getting tournament information...', fg='white', bg='green')
     tourn, tourn_name = query_tourn(target_site)
@@ -47,14 +52,6 @@ def main(target_site,update_tables,debug,boy,girl,sections):
     ind = 1
     cookie = utr_login()
     base = pd.DataFrame()
-    with open('Dependencies/date_last_updated.txt', 'r') as file:
-        date = file.read()
-    date = datetime.strptime(date, '%Y-%m-%d')
-    if datetime.today() - date > timedelta(7):
-        update_ranking_tables()
-        with open('Dependencies/date_last_updated.txt', 'w') as file:
-            file.write(datetime.today().strftime('%Y-%m-%d'))
-
     if boy:
         tourn = tourn[tourn['Gender'] == 'M']
         tourn = tourn.set_index(pd.Series(list(range(1, len(tourn.index) + 1))))
