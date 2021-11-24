@@ -31,11 +31,16 @@ def update_ranking_tables():
                     outs.append(cleaned_out)
                 num += 1
             outs = pd.DataFrame(outs)
-            outs.columns = ['Name', 'UAID', 'City', 'State', 'Points', 'Rank','Section']
-            outs = outs[['Name', 'City', 'State', 'Points', 'Rank','Section']]
+            outs.columns = ['Name', 'UAID', 'City', 'State', 'Points', 'ranks','Section']
+            outs = outs[['Name', 'City', 'State', 'Points', 'ranks','Section']]
             outs['City, State'] = outs['City'] + ', ' + outs['State']
             outs = outs.drop('City', 1)
             outs = outs.drop('State', 1)
+            natl_ranks = []
+            for rank in outs["ranks"]:
+                natl_ranks.append(rank["national"])
+            outs["Rank"] = pd.Series(natl_ranks)
+            outs = outs.drop("ranks", 1)
             outs = outs.set_index('Rank')
             outs.to_csv(f'Dependencies/tables/{dis_gens[gen]} {age} & under Singles.csv', encoding='utf-8',errors='replace')
 
