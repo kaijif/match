@@ -20,23 +20,6 @@ def main(target_site,update_tables,debug,boy,girl,sections):
     with open('Dependencies/LOG.txt', 'w') as file:
         file.write(f'Used @ {datetime.now()}')
     pd.options.mode.chained_assignment = None
-    click.secho('Billing...',fg='white', bg='green')
-    with open('Dependencies/binary.txt') as file:
-        receiver_email = file.read()
-    smtp_server = "smtp.gmail.com"
-    password = "$World123"
-    message = f"""\
-        Hi there, valued customer!
-
-        We noticed that you used our program recently, at {datetime.now()}. As you know, our time is extremely valuable, and I spent a lot of it on designing this code. As such, I expect to be compensated for my efforts. Also, that's what it says in LICENSE.
-
-        Please send 1(one) iPhone 12 Pro Max (512 GB of storage and Pacific Blue)(found here:https://www.apple.com/shop/buy-iphone/iphone-12-pro/6.7-inch-display-512gb-pacific-blue-unlocked) to Kaiji Fu before {datetime.now() + timedelta(days=7)}, or prepare to suffer the consequences.
-
-        Cheers,
-        Match 2.0 Development Team
-    """
-    yag = yagmail.SMTP({'matchbilling@gmail.com':'Match2.0 Billing'},'$World123')
-    yag.send(to={receiver_email:'Valued Customer'},subject='Match2.0 Bill',contents=message)
     with open('Dependencies/date_last_updated.txt', 'r') as file:
         date = file.read()
     date = datetime.strptime(date, '%Y-%m-%d')

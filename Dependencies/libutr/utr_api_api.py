@@ -3,6 +3,7 @@ import requests
 import stringdist
 import json
 import time
+import brotli
 
 def utr_login():
     auth_data = json.loads('{"email":"fsjian@hotmail.com","password":"Netmaker99"}')
@@ -49,13 +50,13 @@ def query_utr(player_name, cookies, cookies_number=1):
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36",
     }
     if cookies_number == 1:
-        utr_request = requests.get('https://app.myutr.com/api/v2/search/players', params=payload, cookies=cookies,
+        utr_request = requests.get('https://app.universaltennis.com/api/v2/search/players', params=payload, cookies=cookies,
                                    headers=headers)
     else:
-        utr_request = requests.get('https://app.myutr.com/api/v2/search/players', params=payload, cookies=cookies_2,
+        utr_request = requests.get('https://app.universaltennis.com/api/v2/search/players', params=payload, cookies=cookies_2,
                                    headers=headers)
     try:
-        utr_response = utr_request.json()
+        utr_response = json.loads(brotli.decompress(utr_request.content))
     except json.JSONDecodeError:
         print('Something went wrong...trying again in ten seconds')
         time.sleep(10)
@@ -104,4 +105,4 @@ def query_utr(player_name, cookies, cookies_number=1):
 
 
 if __name__ == '__main__':
-    print(query_utr(input('Player name: ')))
+    print(query_utr(input('Player name: '), utr_login(), 1))
