@@ -1,4 +1,3 @@
-
 body_shop.py
 **/.DS_Store
 Dependencies/binary.txt
@@ -13,4 +12,4 @@ __pycache__/*
 build/*
 dist/*
 match_portable.spec
-password.json
+login.json
