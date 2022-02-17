@@ -13,3 +13,4 @@ __pycache__/*
 build/*
 dist/*
 match_portable.spec
+password.json
