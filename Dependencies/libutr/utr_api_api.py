@@ -3,11 +3,14 @@ import requests
 import stringdist
 import json
 import time
-import brotli
 
 def utr_login():
-    with open('login.json') as file:
-        auth_data = json.load(file)
+    try:
+        with open('Dependencies/libutr/login.json') as file:
+            auth_data = json.load(file)
+    except FileNotFoundError:
+        print('UTR Login information not found! Please place your UTR login details at /Dependencies/libutr/login.json.')
+        return 'No login'
     auth_headers = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "accept-encoding": "gzip, deflate, br",

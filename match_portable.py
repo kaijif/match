@@ -34,6 +34,8 @@ def main(target_site,update_tables,debug,boy,girl,sections):
         tourn.to_csv(f'Dependencies/debug/tourn_{datetime.now()}.txt')
     ind = 1
     cookie = utr_login()
+    if cookie == 'No login':
+        return
     base = pd.DataFrame()
     if boy:
         tourn = tourn[tourn['Gender'] == 'M']
