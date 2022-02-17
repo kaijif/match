@@ -6,7 +6,8 @@ import time
 import brotli
 
 def utr_login():
-    auth_data = json.loads('{"email":"fsjian@hotmail.com","password":"Netmaker99"}')
+    with open('login.json') as file:
+        auth_data = json.load(file)
     auth_headers = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
     "accept-encoding": "gzip, deflate, br",
