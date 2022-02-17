@@ -39,7 +39,7 @@ def query_utr(player_name, cookies, cookies_number=1):
     }
     headers = {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-        "accept-encoding": "gzip, deflate, br",
+        "accept-encoding": "",
         "accept-language": "en-US,en;q=0.9",
         "cache-control": "max-age=0",
         "dnt": "1",
@@ -60,7 +60,7 @@ def query_utr(player_name, cookies, cookies_number=1):
         utr_request = requests.get('https://app.universaltennis.com/api/v2/search/players', params=payload, cookies=cookies_2,
                                    headers=headers)
     try:
-        utr_response = json.loads(brotli.decompress(utr_request.content))
+        utr_response = utr_request.json()
     except json.JSONDecodeError:
         print('Something went wrong...trying again in ten seconds')
         time.sleep(10)

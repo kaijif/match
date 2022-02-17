@@ -1,5 +1,4 @@
-#!/usr/bin/python
-import sys, os, smtplib, ssl, click, yagmail
+import sys, os, click
 import pandas as pd
 from datetime import timedelta
 from datetime import datetime
