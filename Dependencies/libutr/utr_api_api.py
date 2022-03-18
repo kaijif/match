@@ -60,7 +60,7 @@ def query_utr(player_name, cookies, cookies_number=1, max_retries=5):
         utr_request = requests.get('https://app.universaltennis.com/api/v2/search/players', params=payload, cookies=cookies_2,
                                    headers=headers)
     while utr_request.status_code != 200:
-        print('Something went wrong...trying again in ten seconds')
+        print('Wrong status code...trying again in ten seconds')
         time.sleep(10)
         utr_request = requests.get('https://app.myutr.com/api/v2/search/players', params=payload, cookies=cookies,
                                    headers=headers)
