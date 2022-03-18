@@ -31,7 +31,7 @@ def utr_login():
     cookies = {'jwt':auth.headers['jwt-token']}
     return cookies
 
-def query_utr(player_name, cookies, cookies_number=1):
+def query_utr(player_name, cookies, cookies_number=1, max_retries=5):
     cookies2 = None
     data_out = []
     payload = {
@@ -59,14 +59,20 @@ def query_utr(player_name, cookies, cookies_number=1):
     else:
         utr_request = requests.get('https://app.universaltennis.com/api/v2/search/players', params=payload, cookies=cookies_2,
                                    headers=headers)
-    try:
-        utr_response = utr_request.json()
-    except json.JSONDecodeError:
+    while utr_request.status_code != 200:
         print('Something went wrong...trying again in ten seconds')
         time.sleep(10)
         utr_request = requests.get('https://app.myutr.com/api/v2/search/players', params=payload, cookies=cookies,
                                    headers=headers)
-        utr_response = utr_request.json()
+    while True:
+        try:
+            utr_response = utr_request.json()
+            break
+        except json.JSONDecodeError:
+            print('Something went wrong...trying again in ten seconds')
+            time.sleep(10)
+            utr_request = requests.get('https://app.myutr.com/api/v2/search/players', params=payload, cookies=cookies,
+                                       headers=headers)
     for player in utr_response['hits']:
         data_out.append(player['source'])
     included_keys = ["displayName", "singlesUtr", "display"]
