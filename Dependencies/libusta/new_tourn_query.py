@@ -44,7 +44,8 @@ def query_tourn(site):
                         if event_map[division] == event['eventId']:
                             name = player['person']['standardGivenName'] + ' ' + player['person']['standardFamilyName']
                             gender =  player['person']['sex']
-                            player_info = pd.DataFrame([name, division, gender]).transpose()
+                            division_out = division.replace('singles', 'Singles')
+                            player_info = pd.DataFrame([name, division_out, gender]).transpose()
                             out = pd.concat([out, player_info])
     out.columns = ['Player name', 'Events', 'Gender']
     out['index'] = [num for num in range(1, len(out.index) + 1)]

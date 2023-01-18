@@ -37,10 +37,10 @@ def main(target_site,update_tables,debug,boy,girl,sections):
         return
     base = pd.DataFrame()
     if boy:
-        tourn = tourn[tourn['Gender'] == 'M']
+        tourn = tourn[tourn['Gender'] == 'MALE']
         tourn = tourn.set_index(pd.Series(list(range(1, len(tourn.index) + 1))))
     if girl:
-        tourn = tourn[tourn['Gender'] == 'F']
+        tourn = tourn[tourn['Gender'] == 'FEMALE']
         tourn = tourn.set_index(pd.Series(list(range(1, len(tourn.index) + 1))))
 
     print(tourn)
@@ -55,6 +55,8 @@ def main(target_site,update_tables,debug,boy,girl,sections):
         utr['Player Location'] = usta[1]
         utr['Event'] = tourn['Events'][ind]
         utr['Section'] = usta[2]
+        utr = pd.DataFrame(utr)
+        utr = utr.transpose()
         base = pd.concat([base, utr])
         ind += 1
     base = base.reset_index(drop=True)
@@ -67,6 +69,7 @@ def main(target_site,update_tables,debug,boy,girl,sections):
     os.makedirs(f'Rosters/{tourn_name}', exist_ok=True)
     with pd.ExcelWriter(out_name) as writer:
         click.secho('Writing.', nl=False,fg='white', bg='green')
+        base.to_csv('base.csv')
         for div in list(base['Event'].unique()):
             kairrie = query_utr('Kairrie Fu',cookies=cookie)
             click.secho('.', nl=False,fg='white', bg='green')
