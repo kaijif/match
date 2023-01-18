@@ -55,7 +55,7 @@ def main(target_site,update_tables,debug,boy,girl,sections):
         utr['Player Location'] = usta[1]
         utr['Event'] = tourn['Events'][ind]
         utr['Section'] = usta[2]
-        base = base.append(utr)
+        base = pd.concat([base, utr])
         ind += 1
     base = base.reset_index(drop=True)
     base = base.drop_duplicates()
@@ -77,7 +77,7 @@ def main(target_site,update_tables,debug,boy,girl,sections):
             click.secho('.', nl=False,fg='white', bg='green')
             per_base = base[base['Event'] == div]
             if kairrie['USTA rank'] != 'NaN':
-                per_base = per_base.append(kairrie)
+                per_base = pd.concat([per_base, kairrie])
             kaiji = query_utr('Kaiji Fu',cookies=cookie)
             kaiji['USTA rank'] = query_usta_ranking('Kaiji Fu'.upper(), div)[0]
             kaiji['Event'] = div
@@ -85,7 +85,7 @@ def main(target_site,update_tables,debug,boy,girl,sections):
             kaiji['Section'] = 'Southern'
             click.secho('.', nl=False,fg='white', bg='green')
             if kaiji['USTA rank'] != 'NaN':
-                per_base = per_base.append(kaiji)
+                per_base = pd.concat([per_base, kaiji])
             per_base.rename(
                 {
                     'singlesUtr': 'Singles UTR',
@@ -101,9 +101,9 @@ def main(target_site,update_tables,debug,boy,girl,sections):
             per_base = per_base.drop_duplicates()
             per_base['Position'] = [num + 1 for num in range(len(per_base.index))]
             if 'Kaiji Fu' in per_base['Name'].values:
-                kaiji_summary = kaiji_summary.append(per_base[per_base['Name'] == 'Kaiji Fu'])
+                kaiji_summary = pd.concat([kaiji_summary, per_base[per_base['Name'] == 'Kaiji Fu']])
             if 'Kairrie Fu' in per_base['Name'].values:
-                kairrie_summary = kairrie_summary.append(per_base[per_base['Name'] == 'Kairrie Fu'])
+                kairrie_summary = pd.concat([kaiji_summary, per_base[per_base['Name'] == 'Kairrie Fu']])
             per_base = per_base.reset_index()
             utr_per_base = per_base.copy()
             utr_per_base['Singles UTR'] = utr_per_base['Singles UTR'].replace('Not Found', -1)
