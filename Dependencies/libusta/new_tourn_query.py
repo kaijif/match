@@ -34,17 +34,18 @@ def query_tourn(site):
     event_ids = list(set(event_ids))
     event_map = {}
     for event_id in event_ids:
-        event_data_json = '{"operationName":"TournamentPublicEventData","variables":{"eventId":"' + event_id + '","tournamentId":"CE657375-B3DD-4381-B216-E8AC84F1C6CD"},"query":"query TournamentPublicEventData($eventId: ID!, $tournamentId: ID!) {  tournamentPublicEventData(eventId: $eventId, tournamentId: $tournamentId)}"}'
+        event_data_json = '{"operationName":"TournamentPublicEventData","variables":{"eventId":"' + event_id + '","tournamentId":"' + id + '"},"query":"query TournamentPublicEventData($eventId: ID!, $tournamentId: ID!) {  tournamentPublicEventData(eventId: $eventId, tournamentId: $tournamentId)}"}'
         r = requests.post('https://prd-usta-kube-tournamentdesk-public-api.clubspark.pro/', data=event_data_json, headers=headers)
         event_map.update({ r.json()['data']['tournamentPublicEventData']['eventData']['eventInfo']['eventName']: event_id})
     for division in event_map.keys():
-        for player in player_request.json()['data']['tournamentParticipants']:
-            for event in player['events']:
-                    if event_map[division] == event['eventId']:
-                        name = player['person']['standardGivenName'] + ' ' + player['person']['standardFamilyName']
-                        gender =  player['person']['sex']
-                        player_info = pd.DataFrame([name, division, gender]).transpose()
-                        out = pd.concat([out, player_info])
+        if division.endswith('singles'):
+            for player in player_request.json()['data']['tournamentParticipants']:
+                for event in player['events']:
+                        if event_map[division] == event['eventId']:
+                            name = player['person']['standardGivenName'] + ' ' + player['person']['standardFamilyName']
+                            gender =  player['person']['sex']
+                            player_info = pd.DataFrame([name, division, gender]).transpose()
+                            out = pd.concat([out, player_info])
     out.columns = ['Player name', 'Events', 'Gender']
     out['index'] = [num for num in range(1, len(out.index) + 1)]
     out = out.set_index('index')
@@ -52,4 +53,4 @@ def query_tourn(site):
 
 
 if __name__ == '__main__':
-    print(query_tourn("https://playtennis.usta.com/Competitions/virginiabeachtennisandcountryclub/Tournaments/draws/CE657375-B3DD-4381-B216-E8AC84F1C6CD"))
+    print(query_tourn("https://playtennis.usta.com/Competitions/macon-area-tennis-association/Tournaments/players/8AB2FA8B-E857-41DE-B42C-4C6D0AC075A4"))
