@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import json
 import click
-
+import time
 
 def update_ranking_tables():
     token = 'Bearer ' + requests.post('https://www.usta.com/etc/usta/nologinjwt.nljwt.json').json()['access_token']
@@ -21,8 +21,13 @@ def update_ranking_tables():
                     '{"pagination":{"pageSize":100,"currentPage":1},"selection":{"catalogId":"JUNIOR_NULL_' + gen + '_STANDING_Y' + str(
                         age) + '_UNDER_NULL_NULL_NULL"}}')
                 json_data['pagination']['currentPage'] = num
+                # s = requests.Session()
+                # retries = requests.adapters.Retry(total=5, backoff_factor=2, status_forcelist=[ 500, 501, 502, 503, 504 ])
+                # s.mount('http://', requests.adapters.HTTPAdapter(max_retries=retries))
                 r = requests.post('https://services.usta.com/v1/dataexchange/rankings/search/public', json=json_data,
                                   headers=headers)
+                if r.status_code in [ 500, 501, 502, 503, 504 ]:
+                    break
                 if not r.json()['data']:
                     break
                 for out in r.json()['data']:
@@ -34,13 +39,13 @@ def update_ranking_tables():
             outs.columns = ['Name', 'UAID', 'City', 'State', 'Trend', 'Points', 'ranks','Section']
             outs = outs[['Name', 'City', 'State', 'Points', 'ranks','Section']]
             outs['City, State'] = outs['City'] + ', ' + outs['State']
-            outs = outs.drop('City', 1)
-            outs = outs.drop('State', 1)
+            outs = outs.drop('City', axis=1)
+            outs = outs.drop('State', axis=1)
             natl_ranks = []
             for rank in outs["ranks"]:
                 natl_ranks.append(rank["national"])
             outs["Rank"] = pd.Series(natl_ranks)
-            outs = outs.drop("ranks", 1)
+            outs = outs.drop("ranks", axis=1)
             outs = outs.set_index('Rank')
             outs.to_csv(f'Dependencies/tables/{dis_gens[gen]} {age} & under Singles.csv', encoding='utf-8',errors='replace')
 
